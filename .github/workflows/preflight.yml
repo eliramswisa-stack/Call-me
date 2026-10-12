@@ -4,7 +4,9 @@ on:
   push:
     paths:
       - "tools/preflight.py"
+      - "tools/call_gate.py"
       - "tests/test_preflight.py"
+      - "tests/test_call_gate.py"
       - ".github/workflows/preflight.yml"
 permissions:
   contents: read
@@ -16,6 +18,8 @@ jobs:
       - uses: actions/checkout@v4
       - name: Unit tests
         run: python -m unittest discover -s tests -v
+      - name: Safe call gate dry run (never dials)
+        run: python tools/call_gate.py --dry-run --owner-consent
       - name: SIP URI test
         run: python tools/preflight.py
       - name: SIP DNS and TLS check (never dials)
