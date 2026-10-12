@@ -47,6 +47,13 @@ jobs:
           echo 'Available sound devices:'
           if [ -r /proc/asound/cards ]; then cat /proc/asound/cards; else echo 'No ALSA hardware cards'; fi
           echo 'Note: no real audio source or sink has yet been configured; a successful outgoing SIP INVITE is not proof of functioning RTP media.'
+      - name: Prepare headless audio source for next call test
+        shell: bash
+        run: |
+          set -eu
+          python tools/audio_probe.py /tmp/call-me-tone.wav --seconds 90
+          python tools/media_config.py /tmp/call-me-media /tmp/call-me-tone.wav
+          echo 'PCM source prepared; existing call step remains unchanged.'
       - name: Attempt one owner-authorized SIP test call
         shell: bash
         run: |
