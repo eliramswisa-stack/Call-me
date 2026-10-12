@@ -11,7 +11,7 @@ FAIL_PATTERNS = [
     r"module (?:g711|aufile)\.so: No such file",
     r"cannot open shared object file",
     r"registration failed",
-    r"SIP/2\.0 (?:403|404|407|408|480|486|500|503)",
+    r"SIP/2\.0 (?:403|404|408|480|486|500|503)",
 ]
 PASS_PATTERNS = [r"call established", r"call connected", r"SIP/2\.0 200 OK"]
 def classify(log):
