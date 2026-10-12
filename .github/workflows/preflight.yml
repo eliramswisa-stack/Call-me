@@ -5,8 +5,10 @@ on:
     paths:
       - "tools/preflight.py"
       - "tools/call_gate.py"
+      - "tools/audio_probe.py"
       - "tests/test_preflight.py"
       - "tests/test_call_gate.py"
+      - "tests/test_audio_probe.py"
       - ".github/workflows/preflight.yml"
 permissions:
   contents: read
@@ -22,6 +24,8 @@ jobs:
         run: python -m unittest discover -s tests -v
       - name: Safe call gate dry run (never dials)
         run: python tools/call_gate.py --dry-run --owner-consent
+      - name: Generate and inspect deterministic PCM WAV (no SIP call)
+        run: python tools/audio_probe.py /tmp/call-me-reference.wav
       - name: SIP URI test
         run: python tools/preflight.py
       - name: SIP DNS and TLS check (never dials)
