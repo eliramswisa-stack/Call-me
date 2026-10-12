@@ -1,40 +1,37 @@
 #!/usr/bin/env python3
-"""Generate a standard PCM mono reference tone for validating local audio handling.
-NO SIP call is initiated and NO AI synthesis is implied."""
+"""Generate a mono 16kHz 16-bit looping reference tone for Baresip SIP media testing.
+No outbound calling is performed. Tone is NOT Hebrew TTS."""
 import argparse
 import math
 import struct
 import wave
-
-RATE = 16000
-FREQUENCY = 440
-SECONDS = 2
-
-def generate(path, rate=RATE, frequency=FREQUENCY, duration=SECONDS):
-    if rate != RATE or frequency != FREQUENCY or duration != SECONDS:
-        raise ValueError("Reference tone parameters are fixed for reproducible testing")
-    with wave.open(str(path), "wb") as output:
-        output.setnchannels(1)
-        output.setsampwidth(2)
-        output.setframerate(rate)
-        frames = bytearray()
-        for index in range(rate * duration):
-            value = int(6000 * math.sin(2 * math.pi * frequency * index / rate))
-            frames.extend(struct.pack("<h", value))
-        output.writeframes(frames)
-
+RATE=16000
+def generate(path, seconds=90, frequency=440):
+    if not 2 <= seconds <= 180 or frequency != 440:
+        raise ValueError("Unsafe duration/frequency")
+    with wave.open(str(path),"wb") as out:
+        out.setnchannels(1)
+        out.setsampwidth(2)
+        out.setframerate(RATE)
+        batch=bytearray()
+        for i in range(RATE * seconds):
+            # 2 seconds tone, 1 second silence repeated; facilitates hearing checks
+            value = int(6000 * math.sin(2*math.pi*frequency*i/RATE)) if (i//RATE)%3 != 2 else 0
+            batch.extend(struct.pack("<h",value))
+            if len(batch)>=32768:
+                out.writeframesraw(batch)
+                batch.clear()
+        if batch: out.writeframesraw(batch)
+        out.writeframes(b"")
 def inspect(path):
-    with wave.open(str(path), "rb") as sound:
-        result = {"channels": sound.getnchannels(), "sample_rate": sound.getframerate(),
-                  "bit_depth": sound.getsampwidth() * 8, "frames": sound.getnframes()}
-    if result != {"channels": 1, "sample_rate": RATE, "bit_depth": 16, "frames": RATE * SECONDS}:
-        raise ValueError("Unexpected reference WAV characteristics")
-    return result
-
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
-    parser.add_argument("path")
-    args = parser.parse_args()
-    generate(args.path)
-    print(inspect(args.path))
-    print("PASS: local PCM generation only; SIP/RTP audio is NOT VERIFIED")
+    with wave.open(str(path),"rb") as w:
+        return {"channels":w.getnchannels(),"sample_rate":w.getframerate(),"bit_depth":w.getsampwidth()*8,"frames":w.getnframes()}
+if __name__=="__main__":
+    p=argparse.ArgumentParser()
+    p.add_argument("path")
+    p.add_argument("--seconds",type=int,default=90)
+    a=p.parse_args()
+    generate(a.path, a.seconds)
+    result=inspect(a.path)
+    assert result=={"channels":1,"sample_rate":RATE,"bit_depth":16,"frames":RATE*a.seconds}
+    print("PASS: PCM WAV created; does not prove SIP/RTP",result)
