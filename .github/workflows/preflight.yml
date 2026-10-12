@@ -7,11 +7,13 @@ on:
       - "tools/call_gate.py"
       - "tools/audio_probe.py"
       - "tools/media_config.py"
+      - "tools/resolve_modules.py"
       - "tools/hebrew_voice.py"
       - "tests/test_preflight.py"
       - "tests/test_call_gate.py"
       - "tests/test_audio_probe.py"
       - "tests/test_media_config.py"
+      - "tests/test_resolve_modules.py"
       - "tests/test_hebrew_voice.py"
       - ".github/workflows/preflight.yml"
 permissions:
