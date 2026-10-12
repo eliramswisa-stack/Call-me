@@ -36,6 +36,15 @@ jobs:
         run: |
           sudo apt-get update -qq
           sudo DEBIAN_FRONTEND=noninteractive apt-get install -y baresip
+      - name: Diagnose headless audio prerequisites (no call)
+        shell: bash
+        run: |
+          set -eu
+          echo 'Baresip version:'
+          baresip -h 2>&1 | head -35 || true
+          echo 'Available sound devices:'
+          if [ -r /proc/asound/cards ]; then cat /proc/asound/cards; else echo 'No ALSA hardware cards'; fi
+          echo 'Note: no real audio source or sink has yet been configured; a successful outgoing SIP INVITE is not proof of functioning RTP media.'
       - name: Attempt one owner-authorized SIP test call
         shell: bash
         run: |
