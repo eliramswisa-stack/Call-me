@@ -7,7 +7,7 @@ class AudioProbeTests(unittest.TestCase):
     def test_pcm_wav(self):
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "reference.wav"
-            generate(path)
+            generate(path, seconds=2)
             self.assertEqual(inspect(path)["sample_rate"], 16000)
             self.assertEqual(inspect(path)["frames"], 32000)
 
