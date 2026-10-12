@@ -9,8 +9,11 @@ OPTIONAL=("stdio","menu")
 def resolve(config, roots=None):
     config=Path(config)
     if roots is None:
-        result=subprocess.run(["dpkg","-L","baresip"],capture_output=True,text=True,check=True)
-        files=[Path(x) for x in result.stdout.splitlines()]
+        files=[]
+        for package in ("baresip", "baresip-modules"):
+            result=subprocess.run(["dpkg","-L",package],capture_output=True,text=True)
+            if result.returncode==0:
+                files.extend(Path(x) for x in result.stdout.splitlines())
     else:
         files=[Path(x) for x in roots]
     found={}
