@@ -1,0 +1,22 @@
+name: Safe SIP preflight (NO CALLS)
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "tools/preflight.py"
+      - "tests/test_preflight.py"
+      - ".github/workflows/preflight.yml"
+permissions:
+  contents: read
+jobs:
+  preflight:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Unit tests
+        run: python -m unittest discover -s tests -v
+      - name: SIP URI test
+        run: python tools/preflight.py
+      - name: SIP DNS and TLS check (never dials)
+        run: python tools/preflight.py --network
