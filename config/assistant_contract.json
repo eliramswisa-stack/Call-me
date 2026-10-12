@@ -1,0 +1,21 @@
+{
+  "version": 1,
+  "language": "he-IL",
+  "voice_mode": "continuous_bidirectional",
+  "max_call_duration_seconds": null,
+  "end_policy": "owner_hangup_or_safety_failure",
+  "allow_interruption": true,
+  "target_sip": "sip:eliramswis@sip.linphone.org",
+  "notify_sources": [
+    {"source": "github", "repository": "eliramswisa-stack/Call-me", "events": ["workflow_failure", "verified_release"]},
+    {"source": "github", "repository": "eliramswisa-stack/ai-trading-guard-quantum-source", "events": ["verified_release", "blocking_ci_failure"]}
+  ],
+  "chatgpt_conversation_sync": "not_connected",
+  "hebrew_stt": "not_connected",
+  "hebrew_tts": "not_connected",
+  "dialogue_engine": "not_connected",
+  "outbound_sip_runtime": "experimental_not_verified",
+  "scheduled_outbound_calls": "disabled_until_consented_and_tested",
+  "paid_providers": "forbidden",
+  "billing": "disabled"
+}
