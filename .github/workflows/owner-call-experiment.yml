@@ -1,0 +1,53 @@
+name: Owner SIP call experiment (MANUAL)
+on:
+  workflow_dispatch:
+    inputs:
+      confirm_owner_call:
+        description: "Type CALL_MY_LINPHONE to authorize one test call to your own SIP account"
+        required: true
+        type: string
+permissions:
+  contents: read
+jobs:
+  sip-call:
+    if: ${{ inputs.confirm_owner_call == 'CALL_MY_LINPHONE' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      SIP_SENDER_USERNAME: ${{ secrets.SIP_SENDER_USERNAME }}
+      SIP_SENDER_PASSWORD: ${{ secrets.SIP_SENDER_PASSWORD }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify intended recipient and sending credentials
+        shell: bash
+        run: |
+          set -eu
+          python tools/call_gate.py --dry-run --owner-consent
+          if [ -z "$SIP_SENDER_USERNAME" ] || [ -z "$SIP_SENDER_PASSWORD" ]; then
+            echo "::error::A separate free outgoing SIP account must be configured in GitHub Actions secrets first."
+            exit 1
+          fi
+          if ! [[ "$SIP_SENDER_USERNAME" =~ ^[a-z0-9_.-]{6,64}$ ]]; then
+            echo "::error::SIP sender username format invalid."
+            exit 1
+          fi
+          echo "Recipient fixed to owner Linphone account. Never logs passwords."
+      - name: Install open-source Baresip
+        run: |
+          sudo apt-get update -qq
+          sudo DEBIAN_FRONTEND=noninteractive apt-get install -y baresip
+      - name: Attempt one owner-authorized SIP test call
+        shell: bash
+        run: |
+          set -eu
+          umask 077
+          cfg="$(mktemp -d)"
+          trap 'rm -rf "$cfg"' EXIT
+          # Baresip account file. No secrets are committed to GitHub or printed.
+          printf '<sip:%s@sip.linphone.org>;auth_user="%s";auth_pass="%s"\n' "$SIP_SENDER_USERNAME" "$SIP_SENDER_USERNAME" "$SIP_SENDER_PASSWORD" > "$cfg/accounts"
+          # Create the rest of standard defaults. Baresip CLI and modules are version-dependent.
+          timeout 50s baresip -f "$cfg" -e '/dial sip:eliramswis@sip.linphone.org' -t 35 || {
+            echo "::error::SIP attempt failed or timed out; inspect sanitized logs (no success assumed)."
+            exit 1
+          }
+          echo "::notice::CLI returned successfully. This does NOT establish that iPhone rang or call audio worked."
