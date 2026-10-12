@@ -63,6 +63,8 @@ jobs:
           trap 'rm -rf "$cfg"' EXIT
           # Baresip account file. No secrets are committed to GitHub or printed.
           printf '<sip:%s@sip.linphone.org>;auth_user="%s";auth_pass="%s"\n' "$SIP_SENDER_USERNAME" "$SIP_SENDER_USERNAME" "$SIP_SENDER_PASSWORD" > "$cfg/accounts"
+          # Load the prepared headless PCM source instead of a physical sound card.
+          cp /tmp/call-me-media/config "$cfg/config"
           # Create the rest of standard defaults. Baresip CLI and modules are version-dependent.
           timeout 50s baresip -f "$cfg" -e '/dial sip:eliramswis@sip.linphone.org' -t 35 || {
             echo "::error::SIP attempt failed or timed out; inspect sanitized logs (no success assumed)."
