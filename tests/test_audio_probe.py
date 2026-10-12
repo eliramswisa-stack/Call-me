@@ -14,4 +14,4 @@ class AudioProbeTests(unittest.TestCase):
     def test_parameter_lock(self):
         with tempfile.TemporaryDirectory() as directory:
             with self.assertRaises(ValueError):
-                generate(Path(directory) / "bad.wav", frequency=1000)
+                generate(Path(directory) / "bad.wav", seconds=181)
