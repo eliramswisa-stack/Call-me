@@ -6,10 +6,6 @@ from pathlib import Path
 CONFIG = """# Temporary experimental headless audio test
 audio_source aufile,{wav}
 audio_player aufile,{sink}
-module stdio.so
-module g711.so
-module aufile.so
-module menu.so
 """
 
 def write_config(folder, wav):
