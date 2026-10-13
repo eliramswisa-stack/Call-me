@@ -10,7 +10,7 @@ def resolve(config, roots=None):
     config=Path(config)
     if roots is None:
         files=[]
-        for package in ("baresip", "baresip-modules"):
+        for package in ("baresip-core", "baresip", "baresip-modules"):
             result=subprocess.run(["dpkg","-L",package],capture_output=True,text=True)
             if result.returncode==0:
                 files.extend(Path(x) for x in result.stdout.splitlines())
