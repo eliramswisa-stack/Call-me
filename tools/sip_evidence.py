@@ -24,4 +24,9 @@ if __name__=="__main__":
     p=argparse.ArgumentParser()
     p.add_argument("log")
     args=p.parse_args()
-    print(classify(Path(args.log).read_text(errors="replace")))
+    verdict = classify(Path(args.log).read_text(errors="replace"))
+    print(verdict)
+    if verdict == "FAIL_MEDIA_OR_SIGNALING":
+        raise SystemExit(2)
+    if verdict == "UNVERIFIED_NO_CALL_EVIDENCE":
+        raise SystemExit(3)
