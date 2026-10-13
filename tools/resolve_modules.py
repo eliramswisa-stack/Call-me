@@ -28,7 +28,7 @@ def resolve(config, roots=None):
     with config.open("a",encoding="utf-8") as out:
         out.write("\nmodule_path "+str(folder)+"\n")
         for name in REQUIRED+OPTIONAL:
-            if name in found: out.write("module "+name+".so\n")
+            if name in found: out.write(("module_app " if name == "stdio" else "module ") + name + ".so\n")
     return sorted(found)
 
 if __name__=="__main__":
