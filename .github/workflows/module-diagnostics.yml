@@ -22,7 +22,7 @@ jobs:
       - name: Install free Baresip package
         run: |
           sudo apt-get update -qq
-          sudo DEBIAN_FRONTEND=noninteractive apt-get install -y baresip
+          sudo DEBIAN_FRONTEND=noninteractive apt-get install -y baresip-core
       - name: Run unit tests
         run: python -m unittest discover -s tests -v
       - name: Inspect audio modules without dialing
@@ -30,5 +30,8 @@ jobs:
           set -eu
           python tools/audio_probe.py /tmp/probe.wav --seconds 6
           python tools/media_config.py /tmp/diagnostic-config /tmp/probe.wav
+          dpkg-query -L baresip-core | grep -E '/(g711|aufile)\.so
+          echo 'Module layout discovered. No calls have been attempted.'
+ || true
           python tools/resolve_modules.py /tmp/diagnostic-config/config
           echo 'Module layout discovered. No calls have been attempted.'
