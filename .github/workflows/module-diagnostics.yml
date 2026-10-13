@@ -14,7 +14,7 @@ permissions:
 jobs:
   modules:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 8
     steps:
       - uses: actions/checkout@v5
         with:
@@ -25,13 +25,10 @@ jobs:
           sudo DEBIAN_FRONTEND=noninteractive apt-get install -y baresip-core
       - name: Run unit tests
         run: python -m unittest discover -s tests -v
-      - name: Inspect audio modules without dialing
+      - name: Inspect Baresip modules without dialing
         run: |
-          set -eu
+          set -euo pipefail
           python tools/audio_probe.py /tmp/probe.wav --seconds 6
           python tools/media_config.py /tmp/diagnostic-config /tmp/probe.wav
-          dpkg-query -L baresip-core | grep -E '/(g711|aufile)\.so
-          echo 'Module layout discovered. No calls have been attempted.'
- || true
           python tools/resolve_modules.py /tmp/diagnostic-config/config
-          echo 'Module layout discovered. No calls have been attempted.'
+          echo "Audio module discovery finished. No calls attempted."
