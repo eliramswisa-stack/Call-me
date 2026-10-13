@@ -31,4 +31,18 @@ jobs:
           python tools/audio_probe.py /tmp/probe.wav --seconds 6
           python tools/media_config.py /tmp/diagnostic-config /tmp/probe.wav
           python tools/resolve_modules.py /tmp/diagnostic-config/config
-          echo "Audio module discovery finished. No calls attempted."
+          # Offline startup smoke test: no accounts, no credentials, no dialing.
+          touch /tmp/diagnostic-config/accounts
+          set +e
+          timeout 12s baresip -f /tmp/diagnostic-config -t 3 > /tmp/baresip-offline.log 2>&1
+          status=$?
+          set -e
+          if grep -Eiq 'Populated 0 audio codecs|cannot open shared object file|module .*No such file|module .*not found' /tmp/baresip-offline.log; then
+            echo "::error::Baresip failed its offline audio startup check."
+            exit 1
+          fi
+          if [ "$status" -ne 0 ]; then
+            echo "::error::Baresip offline startup failed (exit code $status)."
+            exit 1
+          fi
+          echo "Baresip offline startup passed. RTP media and real calls NOT verified."
