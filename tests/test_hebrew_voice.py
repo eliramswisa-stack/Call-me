@@ -17,7 +17,7 @@ class HebrewVoiceTests(unittest.TestCase):
         fake=MagicMock()
         fake.__enter__.return_value=fake
         fake.__exit__.return_value=False
-        fake.read.return_value=b'{"message":{"content":"שלום, מה תרצה לדעת?"}}'
+        fake.read.return_value='{"message":{"content":"שלום, מה תרצה לדעת?"}}'.encode("utf-8")
         with patch("urllib.request.urlopen",return_value=fake):
             text=hv.ask_local_model([{"role":"user","content":"שלום"}])
         self.assertEqual(text,"שלום, מה תרצה לדעת?")
