@@ -7,6 +7,8 @@ on:
       - "tools/media_config.py"
       - "tools/audio_probe.py"
       - "tests/test_audio_probe.py"
+      - "tests/test_hebrew_voice.py"
+      - "tools/hebrew_voice.py"
       - "tests/test_resolve_modules.py"
       - ".github/workflows/module-diagnostics.yml"
 permissions:
