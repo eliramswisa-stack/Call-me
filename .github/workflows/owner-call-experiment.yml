@@ -67,8 +67,19 @@ jobs:
           cp /tmp/call-me-media/config "$cfg/config"
           python tools/resolve_modules.py "$cfg/config"
           # Create the rest of standard defaults. Baresip CLI and modules are version-dependent.
-          timeout 50s baresip -f "$cfg" -e '/dial sip:eliramswis@sip.linphone.org' -t 35 || {
-            echo "::error::SIP attempt failed or timed out; inspect sanitized logs (no success assumed)."
+          # Never present a successful process exit as a proven SIP connection.
+          # Store logs in private ephemeral storage and report only a safe classification.
+          set +e
+          timeout 50s baresip -f "$cfg" -e '/dial sip:eliramswis@sip.linphone.org' -t 35 > "$cfg/session.log" 2>&1
+          result=$?
+          set -e
+          python tools/sip_evidence.py "$cfg/session.log"
+          if [ "$result" -ne 0 ]; then
+            echo "::error::Baresip failed or timed out (exit code $result). Call not verified."
             exit 1
-          }
-          echo "::notice::CLI returned successfully. This does NOT establish that iPhone rang or call audio worked."
+          fi
+          if grep -Eiq 'Populated 0 audio codecs|module (g711|aufile).*No such file|cannot open shared object file' "$cfg/session.log"; then
+            echo "::error::Baresip audio modules or codecs failed to load."
+            exit 1
+          fi
+          echo "::notice::Baresip exited normally, but ringing, RTP audio and Hebrew conversation are NOT VERIFIED."
