@@ -37,7 +37,7 @@ jobs:
       - name: Install open-source Baresip
         run: |
           sudo apt-get update -qq
-          sudo DEBIAN_FRONTEND=noninteractive apt-get install -y baresip
+          sudo DEBIAN_FRONTEND=noninteractive apt-get install -y baresip-core
       - name: Diagnose headless audio prerequisites (no call)
         shell: bash
         run: |
