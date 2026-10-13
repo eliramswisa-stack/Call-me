@@ -66,6 +66,22 @@ jobs:
           # Load the prepared headless PCM source instead of a physical sound card.
           cp /tmp/call-me-media/config "$cfg/config"
           python tools/resolve_modules.py "$cfg/config"
+          # Fail closed if the packaged Baresip modules cannot start without a call.
+          # Use an isolated empty account file; no user credentials in the preflight.
+          probe="$(mktemp -d)"
+          cp "$cfg/config" "$probe/config"
+          touch "$probe/accounts"
+          set +e
+          timeout 12s baresip -f "$probe" -t 3 > "$probe/probe.log" 2>&1
+          probe_status=$?
+          set -e
+          if [ "$probe_status" -ne 0 ] || ! grep -Eiq 'Populated [1-9][0-9]* audio codecs' "$probe/probe.log"; then
+            echo "::error::Offline Baresip codec preflight failed. No call attempted."
+            rm -rf "$probe"
+            exit 1
+          fi
+          rm -rf "$probe"
+          echo "Offline audio codecs confirmed; next step is one authorized SIP test."
           # Create the rest of standard defaults. Baresip CLI and modules are version-dependent.
           # Never present a successful process exit as a proven SIP connection.
           # Store logs in private ephemeral storage and report only a safe classification.
