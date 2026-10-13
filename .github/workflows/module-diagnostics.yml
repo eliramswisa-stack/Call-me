@@ -22,7 +22,7 @@ jobs:
       - name: Install free Baresip package
         run: |
           sudo apt-get update -qq
-          sudo DEBIAN_FRONTEND=noninteractive apt-get install -y baresip-core
+          sudo DEBIAN_FRONTEND=noninteractive apt-get install -y baresip baresip-core
       - name: Run unit tests
         run: python -m unittest discover -s tests -v
       - name: Inspect Baresip modules without dialing
