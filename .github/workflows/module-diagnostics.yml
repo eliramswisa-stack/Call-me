@@ -37,6 +37,9 @@ jobs:
           timeout 12s baresip -f /tmp/diagnostic-config -t 3 > /tmp/baresip-offline.log 2>&1
           status=$?
           set -e
+          echo "Baresip offline exit code: $status"
+          echo "Safe module diagnostics:"
+          grep -Ei '(^|[[:space:]])(module|audio codecs|Populated|error|warning)' /tmp/baresip-offline.log | head -30 || true
           if grep -Eiq 'Populated 0 audio codecs|cannot open shared object file|module .*No such file|module .*not found' /tmp/baresip-offline.log; then
             echo "::error::Baresip failed its offline audio startup check."
             exit 1
@@ -45,4 +48,7 @@ jobs:
             echo "::error::Baresip offline startup failed (exit code $status)."
             exit 1
           fi
-          echo "Baresip offline startup passed. RTP media and real calls NOT verified."
+          if ! grep -Eiq 'Populated [1-9][0-9]* audio codecs' /tmp/baresip-offline.log; then
+            echo "::warning::Codec count not positively confirmed from Baresip output; do not assume audio readiness."
+          fi
+          echo "Baresip offline process exited normally. RTP and calls are still NOT verified."
